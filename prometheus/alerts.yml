@@ -1,0 +1,90 @@
+groups:
+  - name: chainops.ethereum
+    interval: 30s
+    rules:
+
+      # ─── RPC Health ────────────────────────────────────────────────────────
+      - alert: RPCDown
+        expr: chainops_rpc_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Ethereum RPC endpoint is unreachable"
+          description: "The configured RPC endpoint has been down for more than 1 minute. Check provider status and failover options."
+
+      - alert: HighRPCLatency
+        expr: histogram_quantile(0.99, rate(chainops_rpc_latency_seconds_bucket[5m])) > 3
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RPC p99 latency exceeds 3 seconds"
+          description: "p99 latency is {{ $value | humanizeDuration }}. Consider switching to a faster RPC provider or adding load balancing."
+
+      - alert: CriticalRPCLatency
+        expr: histogram_quantile(0.99, rate(chainops_rpc_latency_seconds_bucket[5m])) > 8
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "RPC p99 latency critically high (>8s)"
+          description: "p99 latency is {{ $value | humanizeDuration }}. Immediate action required."
+
+      # ─── Block Production ──────────────────────────────────────────────────
+      - alert: SlowBlockTime
+        expr: chainops_block_time_seconds > 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Ethereum block time above 20 seconds"
+          description: "Block time is {{ $value }}s (normal ~12s). Network may be experiencing congestion or consensus issues."
+
+      - alert: CriticalBlockTime
+        expr: chainops_block_time_seconds > 60
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Ethereum block time critically high (>60s)"
+          description: "Block time is {{ $value }}s. Possible network partition or severe consensus failure."
+
+      # ─── Gas Price ─────────────────────────────────────────────────────────
+      - alert: HighGasPrice
+        expr: chainops_gas_price_gwei > 150
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Gas price above 150 Gwei"
+          description: "Current gas price: {{ $value }} Gwei. Transactions may be expensive or stuck."
+
+      - alert: CriticalGasPrice
+        expr: chainops_gas_price_gwei > 500
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Gas price critically high (>500 Gwei)"
+          description: "Current gas price: {{ $value }} Gwei. Network severely congested."
+
+      # ─── Mempool ───────────────────────────────────────────────────────────
+      - alert: MempoolCongestion
+        expr: chainops_pending_tx_count > 80000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Mempool congestion — {{ $value | humanize }} pending transactions"
+          description: "High pending transaction count may indicate network congestion. Gas prices likely rising."
+
+      # ─── RPC Errors ────────────────────────────────────────────────────────
+      - alert: RapidRPCErrors
+        expr: rate(chainops_rpc_errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RPC error rate above 0.1/s"
+          description: "Sustained RPC errors detected. Rate: {{ $value | humanize }}/s. Check provider status."

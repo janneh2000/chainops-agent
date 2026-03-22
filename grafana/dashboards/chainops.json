@@ -1,0 +1,65 @@
+{
+  "title": "ChainOps Agent — Ethereum Infrastructure",
+  "uid": "chainops-main",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "refresh": "15s",
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "RPC Status",
+      "gridPos": {"x": 0, "y": 0, "w": 4, "h": 4},
+      "targets": [{"expr": "chainops_rpc_up", "datasource": "Prometheus"}],
+      "options": {"colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {"defaults": {"mappings": [{"type": "value","options": {"0": {"text": "DOWN","color": "red"},"1": {"text": "UP","color": "green"}}}]}}
+    },
+    {
+      "id": 2, "type": "stat", "title": "Latest Block",
+      "gridPos": {"x": 4, "y": 0, "w": 4, "h": 4},
+      "targets": [{"expr": "chainops_block_number", "datasource": "Prometheus"}],
+      "options": {"colorMode": "value", "graphMode": "none"}
+    },
+    {
+      "id": 3, "type": "stat", "title": "Gas Price (Gwei)",
+      "gridPos": {"x": 8, "y": 0, "w": 4, "h": 4},
+      "targets": [{"expr": "chainops_gas_price_gwei", "datasource": "Prometheus"}],
+      "options": {"colorMode": "background"},
+      "fieldConfig": {"defaults": {"thresholds": {"steps": [{"color": "green","value": null},{"color": "yellow","value": 80},{"color": "red","value": 200}]}}}
+    },
+    {
+      "id": 4, "type": "stat", "title": "Block Time (s)",
+      "gridPos": {"x": 12, "y": 0, "w": 4, "h": 4},
+      "targets": [{"expr": "chainops_block_time_seconds", "datasource": "Prometheus"}],
+      "options": {"colorMode": "background"},
+      "fieldConfig": {"defaults": {"thresholds": {"steps": [{"color": "green","value": null},{"color": "yellow","value": 15},{"color": "red","value": 25}]}}}
+    },
+    {
+      "id": 5, "type": "timeseries", "title": "Gas Price Over Time",
+      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+      "targets": [
+        {"expr": "chainops_gas_price_gwei", "legendFormat": "Base", "datasource": "Prometheus"},
+        {"expr": "chainops_gas_price_fast_gwei", "legendFormat": "Fast", "datasource": "Prometheus"}
+      ]
+    },
+    {
+      "id": 6, "type": "timeseries", "title": "RPC Latency",
+      "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
+      "targets": [
+        {"expr": "histogram_quantile(0.99, rate(chainops_rpc_latency_seconds_bucket[5m]))", "legendFormat": "p99", "datasource": "Prometheus"},
+        {"expr": "histogram_quantile(0.50, rate(chainops_rpc_latency_seconds_bucket[5m]))", "legendFormat": "p50", "datasource": "Prometheus"}
+      ]
+    },
+    {
+      "id": 7, "type": "timeseries", "title": "Transactions per Block",
+      "gridPos": {"x": 0, "y": 12, "w": 12, "h": 8},
+      "targets": [{"expr": "chainops_block_tx_count", "legendFormat": "Txs", "datasource": "Prometheus"}]
+    },
+    {
+      "id": 8, "type": "timeseries", "title": "Block Gas Used vs Limit",
+      "gridPos": {"x": 12, "y": 12, "w": 12, "h": 8},
+      "targets": [
+        {"expr": "chainops_block_gas_used", "legendFormat": "Used", "datasource": "Prometheus"},
+        {"expr": "chainops_block_gas_limit", "legendFormat": "Limit", "datasource": "Prometheus"}
+      ]
+    }
+  ]
+}

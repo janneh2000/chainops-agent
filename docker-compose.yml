@@ -1,0 +1,96 @@
+version: "3.9"
+
+services:
+  # ─── Alertmanager ───────────────────────────────────────────────────────────
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: chainops-alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    environment:
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+    restart: unless-stopped
+    networks:
+      - chainops
+
+  # ─── AI Agent Backend ───────────────────────────────────────────────────────
+  backend:
+    build: ./backend
+    container_name: chainops-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - PROMETHEUS_URL=http://prometheus:9090
+      - RPC_URL=${RPC_URL:-https://eth.llamarpc.com}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
+      - SCAN_INTERVAL_SECONDS=${SCAN_INTERVAL_SECONDS:-60}
+      - BACKEND_URL=http://backend:8000
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - chainops
+
+  # ─── Web3 Metrics Exporter ──────────────────────────────────────────────────
+  exporter:
+    build: ./exporters
+    container_name: chainops-exporter
+    ports:
+      - "9101:9101"
+    environment:
+      - RPC_URL=${RPC_URL:-https://eth.llamarpc.com}
+      - SCRAPE_INTERVAL=${SCRAPE_INTERVAL:-15}
+    restart: unless-stopped
+    networks:
+      - chainops
+
+  # ─── Prometheus ─────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: chainops-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    restart: unless-stopped
+    networks:
+      - chainops
+
+  # ─── Grafana ────────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    container_name: chainops-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=chainops
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - chainops
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  chainops:
+    driver: bridge
