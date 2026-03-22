@@ -40,7 +40,7 @@ ChainOps Agent monitors Ethereum infrastructure in real time — RPC health, gas
 ### 1. Clone and configure
 
 ```bash
-git clone https://github.com/yourusername/chainops-agent
+git clone https://github.com/janneh2000/chainops-agent
 cd chainops-agent
 cp .env.example .env
 ```
@@ -102,4 +102,4 @@ Mark an incident as resolved.
 ## Built by
 
 Alie Rivaldo Janneh — DevOps & Cloud Engineer  
-[LinkedIn](https://linkedin.com/in/yourprofile) · ETHGlobal Open Agents 2025
+[LinkedIn](https://linkedin.com/in/alie-janneh) · ETHGlobal Open Agents 2026
