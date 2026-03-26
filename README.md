@@ -1,7 +1,7 @@
 # ChainOps Agent 🔗
 
 > An autonomous AI agent for Web3 infrastructure operations.  
-> Built for ETHGlobal Open Agents Hackathon.
+> Built for PL_Genesis: Frontiers of Collaboration Hackathon.
 
 ChainOps Agent monitors Ethereum infrastructure in real time — RPC health, gas prices, block times, mempool congestion — reasons about anomalies using an LLM, and answers questions in plain English. Think Grafana + Prometheus, but with an AI ops brain on top.
 
@@ -102,4 +102,4 @@ Mark an incident as resolved.
 ## Built by
 
 Alie Rivaldo Janneh — DevOps & Cloud Engineer  
-[LinkedIn](https://linkedin.com/in/alie-janneh) · ETHGlobal Open Agents 2026
+[LinkedIn](https://linkedin.com/in/alie-janneh) · PL_Genesis: Frontiers of Collaboration Hackathon 2026
